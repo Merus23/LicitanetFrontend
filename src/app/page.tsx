@@ -1,19 +1,27 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Product } from "./Interfaces/IProducts";
+import { Product, ProductInput } from "./Interfaces/IProducts";
 import { IPopupControl } from "./Interfaces/IGeneralInterfaces";
 import Popup from "./Components/Popup/Popup";
+import Modal from "./Components/Modal/Modal";
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [popupControl, setPopupControl] = useState<IPopupControl>();
+  const [modalControl, setModalControl] = useState<boolean>(false);
+  const [isAddOrEdit, setIsAddOrEdit] = useState<string>();
 
   //FILTER STATES
   const [minValue, setMinValue] = useState<number>(0);
   const [maxValue, setMaxValue] = useState<number>(0);
   const [cidadeFilter, setCidadeFilter] = useState<string>("");
   const [marcaFilter, setMarcaFilter] = useState<string>("");
+
+  //ADD PRODUCT STATES
+  const [productInput, setProductInput] = useState<ProductInput>(
+    {} as ProductInput
+  );
 
   const handleGetAllProducts = async (filter?: string) => {
     try {
@@ -65,15 +73,147 @@ export default function Home() {
     }
   };
 
+  const handleAddProduct = async () => {
+    try {
+      setIsLoading(true);
+      console.log("Product input: ", productInput);
+      const response = await fetch(`http://127.0.0.1:8000/api/produto`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(productInput),
+      });
+      if (response.ok) {
+        setPopupControl({
+          status: true,
+          message: "Produto adicionado com sucesso!",
+        });
+      }
+    } catch (error: any) {
+      setPopupControl({
+        status: false,
+        message: error.message || "Erro desconhecido",
+      });
+    } finally {
+      handleGetAllProducts();
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     handleGetAllProducts();
   }, []);
+
+  //Logger
+  useEffect(() => {}, []);
 
   return (
     <>
       {popupControl && (
         <Popup status={popupControl.status} message={popupControl.message} />
       )}
+
+      {modalControl && isAddOrEdit == "add" && (
+        <Modal
+          handleCloseModal={() => setModalControl(false)}
+          innerDivClassName="h-4/5 w-11/12"
+        >
+          <form
+            className="flex flex-col gap-2"
+            onSubmit={(e: React.FormEvent) => {
+              e.preventDefault();
+              handleAddProduct();
+              setModalControl(false);
+              setProductInput({} as ProductInput);
+            }}
+          >
+            <h1 className="text-xl font-medium">Adicione seu produto</h1>
+            <h6 className="text-red-600">
+              Infelizmente, ainda não é possível adicionar a marca do produto
+              pelo nome (isso também se aplica para a cidade). Pedimos desculpas
+              pelo transtorno.
+            </h6>
+            <div className="flex flex-col">
+              <label htmlFor="nomeProduto">Nome do produto:</label>
+              <textarea
+                id="nomeProduto"
+                className="resize-none border-2 border-black rounded-xl p-1 w-1/4"
+                placeholder="Nome do produto"
+                value={productInput.nome_produto || ""}
+                onChange={(e) =>
+                  setProductInput({
+                    ...productInput,
+                    nome_produto: e.target.value,
+                  })
+                }
+              ></textarea>
+              <label htmlFor="valorProduto">Valor do produto:</label>
+              <input
+                type="number"
+                id="valorProduto"
+                className="border-2 border-black rounded-xl p-1 w-1/4"
+                placeholder="Valor do produto"
+                value={productInput.valor_produto || 0}
+                onChange={(e) =>
+                  setProductInput({
+                    ...productInput,
+                    valor_produto: Number(e.target.value),
+                  })
+                }
+              />
+
+              <label htmlFor="valorProduto">Marca do produto </label>
+              <input
+                type="number"
+                id="marcaProduto"
+                className="border-2 border-black rounded-xl p-1 w-1/4"
+                placeholder="Marca do produto"
+                value={productInput.marca_produto || 0}
+                onChange={(e) =>
+                  setProductInput({
+                    ...productInput,
+                    marca_produto: Number(e.target.value),
+                  })
+                }
+              />
+              <label htmlFor="estoqueProduto">Estoque:</label>
+              <input
+                type="number"
+                id="estoqueProduto"
+                className="border-2 border-black rounded-xl p-1 w-1/4"
+                placeholder="Estoque"
+                value={productInput.estoque || 0}
+                onChange={(e) =>
+                  setProductInput({
+                    ...productInput,
+                    estoque: Number(e.target.value),
+                  })
+                }
+              />
+              <label htmlFor="cidadeProduto">Cidade:</label>
+              <input
+                type="1"
+                id="cidadeProduto"
+                className="border-2 border-black rounded-xl p-1 w-1/4"
+                placeholder="Código da cidade"
+                value={productInput.cidade || 0}
+                onChange={(e) =>
+                  setProductInput({
+                    ...productInput,
+                    cidade: Number(e.target.value),
+                  })
+                }
+              />
+            </div>
+
+            <button className="bg-blue-600 text-white w-40 rounded-xl p-1">
+              Adicionar
+            </button>
+          </form>
+        </Modal>
+      )}
+
       <main className="flex flex-col gap-8 md:w-11/12  mx-auto pt-4">
         <h1 className="text-3xl">Lista de produtos</h1>
         <div className="flex">
@@ -106,7 +246,7 @@ export default function Home() {
                         </div>
 
                         <div className="flex gap-4">
-                          <button className="w-40 bg-blue-600 text-white rounded-xl flex gap-2 justify-center items-center ">
+                          <button className="w-40 bg-blue-600 text-white rounded-xl flex gap-2 p-1 justify-center items-center ">
                             Editar
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -120,7 +260,7 @@ export default function Home() {
                             </svg>
                           </button>
                           <button
-                            className="w-40 bg-red-500 text-white rounded-xl flex gap-2 justify-center items-center"
+                            className="w-40 bg-red-500 text-white rounded-xl p-1 flex gap-2 justify-center items-center"
                             onClick={() =>
                               handleDeleteProduct(product.cod_produto)
                             }
@@ -215,6 +355,16 @@ export default function Home() {
             </div>
           </details>
         </div>
+
+        <button
+          className="bg-blue-600 w-60 p-2 rounded-xl text-white"
+          onClick={() => {
+            setIsAddOrEdit("add");
+            setModalControl(true);
+          }}
+        >
+          Adicionar um novo produto
+        </button>
       </main>
     </>
   );
