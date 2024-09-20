@@ -9,12 +9,21 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [popupControl, setPopupControl] = useState<IPopupControl>();
 
-  const handleGetAllProducts = async () => {
+  //FILTER STATES
+  const [minValue, setMinValue] = useState<number>(0);
+  const [maxValue, setMaxValue] = useState<number>(0);
+  const [cidadeFilter, setCidadeFilter] = useState<string>("");
+  const [marcaFilter, setMarcaFilter] = useState<string>("");
+
+  const handleGetAllProducts = async (filter?: string) => {
     try {
       setIsLoading(true);
-      const response = await fetch(`http://127.0.0.1:8000/api/produtos`, {
-        method: "GET",
-      });
+      const response = await fetch(
+        `http://127.0.0.1:8000/api/produtos${filter ? `${filter}` : ""}`,
+        {
+          method: "GET",
+        }
+      );
 
       if (response.ok) {
         const responseData = await response.json();
@@ -149,6 +158,8 @@ export default function Home() {
                 type="number"
                 id="minValue"
                 className="border-2 border-black rounded-xl w-36"
+                value={minValue}
+                onChange={(e) => setMinValue(Number(e.target.value))}
               />
 
               <label htmlFor="maxValue">Valor máximo:</label>
@@ -156,6 +167,8 @@ export default function Home() {
                 type="number"
                 id="maxValue"
                 className="border-2 border-black rounded-xl w-36"
+                value={maxValue}
+                onChange={(e) => setMaxValue(Number(e.target.value))}
               />
 
               <label htmlFor="cidadeFilter">Cidade:</label>
@@ -163,6 +176,8 @@ export default function Home() {
                 type="text"
                 id="cidadeFilter"
                 className="border-2 border-black rounded-xl w-36"
+                value={cidadeFilter}
+                onChange={(e) => setCidadeFilter(e.target.value)}
               />
 
               <label htmlFor="marcaFilter" className="">
@@ -172,11 +187,28 @@ export default function Home() {
                 type="text"
                 id="marcaFilter"
                 className="border-2 border-black rounded-xl w-36"
+                value={marcaFilter}
+                onChange={(e) => setMarcaFilter(e.target.value)}
               />
 
               <button
                 id="filterButton"
-                className="bg-blue-700 w-28 text-white rounded-xl"
+                className="bg-blue-600 w-28 text-white rounded-xl"
+                onClick={() => {
+                  let filter = "";
+
+                  if (minValue) filter += `?min_valor=${minValue}`;
+                  if (maxValue)
+                    filter += `${filter ? "&" : "?"}max_valor=${maxValue}`;
+                  if (cidadeFilter)
+                    filter += `${filter ? "&" : "?"}cidade=${cidadeFilter}`;
+                  if (marcaFilter)
+                    filter += `${
+                      filter ? "&" : "?"
+                    }marca_produto=${marcaFilter}`;
+
+                  handleGetAllProducts(filter);
+                }}
               >
                 Filtrar
               </button>
