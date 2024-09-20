@@ -11,3 +11,11 @@ export interface Product {
   updated_at: string;
   valor_produto: number;
 }
+
+export interface ProductInput {
+  nome_produto: string;
+  valor_produto: number;
+  marca_produto: number;
+  estoque: number;
+  cidade: number;
+}
