@@ -1,35 +1,72 @@
 import { ProductInput } from "@/app/Interfaces/IProducts";
-import React, { useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect } from "react";
 
 interface ProductFormProps {
   productInput: ProductInput;
   setProductInput: (input: ProductInput) => void;
   handleAddProduct: () => void;
+  handleUpdateProduct: (id: number) => void;
   handleCloseModal: () => void;
+  productId?: number;
+  setProductId?: Dispatch<SetStateAction<string | undefined>>;
 }
 
 export default function ProductForm({
   productInput,
   setProductInput,
   handleAddProduct,
+  handleUpdateProduct,
   handleCloseModal,
+  productId,
+  setProductId,
 }: ProductFormProps) {
+  const handleGetProduct = async (productId: number) => {
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8000/api/produto/${productId}`,
+        {
+          method: "GET",
+        }
+      );
+
+      if (response.ok) {
+        const responseData = await response.json();
+        setProductInput(responseData);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+    }
+  };
+
+  useEffect(() => {
+    if (productId) handleGetProduct(productId);
+  }, [productId, setProductInput]);
+
+  useEffect(() => {
+    if (!productId) setProductInput({} as ProductInput);
+  }, [productId]);
+
   return (
     <form
       className="flex flex-col gap-2"
       onSubmit={(e: React.FormEvent) => {
         e.preventDefault();
-        handleAddProduct();
+
+        if (productId) {
+          handleUpdateProduct(productId);
+        } else {
+          handleAddProduct();
+        }
+
         handleCloseModal();
-        setProductInput({} as ProductInput); // Reseta o formulário após adicionar
+        setProductInput({} as ProductInput);
+        if (setProductId) setProductId(undefined);
       }}
     >
-      <h1 className="text-xl font-medium">Adicione seu produto</h1>
-      <h6 className="text-red-600">
-        Infelizmente, ainda não é possível adicionar a marca do produto pelo
-        nome (isso também se aplica para a cidade). Pedimos desculpas pelo
-        transtorno.
-      </h6>
+      <h1 className="text-xl font-medium">
+        {productId ? "Editar Produto" : "Adicionar Produto"}
+      </h1>
       <div className="flex flex-col">
         <label htmlFor="nomeProduto">Nome do produto:</label>
         <textarea
@@ -104,7 +141,7 @@ export default function ProductForm({
       </div>
 
       <button className="bg-blue-600 text-white w-40 rounded-xl p-1">
-        Adicionar
+        {productId ? "Salvar Alterações" : "Adicionar Produto"}
       </button>
     </form>
   );
