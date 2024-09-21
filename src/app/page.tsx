@@ -8,11 +8,12 @@ import ProductForm from "./Components/ProductForm/ProductForm";
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [editProduct, setEditProduct] = useState<string | undefined>();
+
   const [isLoading, setIsLoading] = useState(false);
   const [popupControl, setPopupControl] = useState<IPopupControl>();
   const [modalControl, setModalControl] = useState<boolean>(false);
   const [isAddOrEdit, setIsAddOrEdit] = useState<string>();
-
   //FILTER STATES
   const [minValue, setMinValue] = useState<number>(0);
   const [maxValue, setMaxValue] = useState<number>(0);
@@ -77,7 +78,6 @@ export default function Home() {
   const handleAddProduct = async () => {
     try {
       setIsLoading(true);
-      console.log("Product input: ", productInput);
       const response = await fetch(`http://127.0.0.1:8000/api/produto`, {
         method: "POST",
         headers: {
@@ -102,12 +102,41 @@ export default function Home() {
     }
   };
 
+  const handleUpdateProduct = async (id: number) => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`http://127.0.0.1:8000/api/produto/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(productInput),
+      });
+      if (response.ok) {
+        setPopupControl({
+          status: true,
+          message: "Produto atualizado com sucesso!",
+        });
+      }
+    } catch (error: any) {
+      setPopupControl({
+        status: false,
+        message: error.message || "Erro desconhecido",
+      });
+    } finally {
+      handleGetAllProducts();
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     handleGetAllProducts();
   }, []);
 
   //Logger
-  useEffect(() => {}, []);
+  useEffect(() => {
+    console.log("PRODUTO", editProduct);
+  }, [editProduct]);
 
   return (
     <>
@@ -115,7 +144,7 @@ export default function Home() {
         <Popup status={popupControl.status} message={popupControl.message} />
       )}
 
-      {modalControl && isAddOrEdit == "add" && (
+      {modalControl && isAddOrEdit && (
         <Modal
           handleCloseModal={() => setModalControl(false)}
           innerDivClassName="h-4/5 w-11/12"
@@ -125,7 +154,13 @@ export default function Home() {
               productInput={productInput}
               setProductInput={setProductInput}
               handleAddProduct={handleAddProduct}
-              handleCloseModal={() => setModalControl(false)}
+              handleCloseModal={() => {
+                setEditProduct(undefined);
+                setModalControl(false);
+              }}
+              handleUpdateProduct={handleUpdateProduct}
+              productId={editProduct ? Number(editProduct) : undefined}
+              setProductId={setEditProduct}
             />
           </>
         </Modal>
@@ -163,7 +198,14 @@ export default function Home() {
                         </div>
 
                         <div className="flex gap-4">
-                          <button className="w-40 bg-blue-600 text-white rounded-xl flex gap-2 p-1 justify-center items-center ">
+                          <button
+                            className="w-40 bg-blue-600 text-white rounded-xl flex gap-2 p-1 justify-center items-center "
+                            onClick={() => {
+                              setIsAddOrEdit("edit");
+                              setEditProduct(product.cod_produto.toString());
+                              setModalControl(true);
+                            }}
+                          >
                             Editar
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -276,6 +318,7 @@ export default function Home() {
         <button
           className="bg-blue-600 w-60 p-2 rounded-xl text-white"
           onClick={() => {
+            setEditProduct(undefined);
             setIsAddOrEdit("add");
             setModalControl(true);
           }}
