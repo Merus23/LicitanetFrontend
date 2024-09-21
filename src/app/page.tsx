@@ -133,11 +133,6 @@ export default function Home() {
     handleGetAllProducts();
   }, []);
 
-  //Logger
-  useEffect(() => {
-    console.log("PRODUTO", editProduct);
-  }, [editProduct]);
-
   return (
     <>
       {popupControl && (
