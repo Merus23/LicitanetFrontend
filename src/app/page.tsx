@@ -4,6 +4,7 @@ import { Product, ProductInput } from "./Interfaces/IProducts";
 import { IPopupControl } from "./Interfaces/IGeneralInterfaces";
 import Popup from "./Components/Popup/Popup";
 import Modal from "./Components/Modal/Modal";
+import ProductForm from "./Components/ProductForm/ProductForm";
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -119,98 +120,14 @@ export default function Home() {
           handleCloseModal={() => setModalControl(false)}
           innerDivClassName="h-4/5 w-11/12"
         >
-          <form
-            className="flex flex-col gap-2"
-            onSubmit={(e: React.FormEvent) => {
-              e.preventDefault();
-              handleAddProduct();
-              setModalControl(false);
-              setProductInput({} as ProductInput);
-            }}
-          >
-            <h1 className="text-xl font-medium">Adicione seu produto</h1>
-            <h6 className="text-red-600">
-              Infelizmente, ainda não é possível adicionar a marca do produto
-              pelo nome (isso também se aplica para a cidade). Pedimos desculpas
-              pelo transtorno.
-            </h6>
-            <div className="flex flex-col">
-              <label htmlFor="nomeProduto">Nome do produto:</label>
-              <textarea
-                id="nomeProduto"
-                className="resize-none border-2 border-black rounded-xl p-1 w-1/4"
-                placeholder="Nome do produto"
-                value={productInput.nome_produto || ""}
-                onChange={(e) =>
-                  setProductInput({
-                    ...productInput,
-                    nome_produto: e.target.value,
-                  })
-                }
-              ></textarea>
-              <label htmlFor="valorProduto">Valor do produto:</label>
-              <input
-                type="number"
-                id="valorProduto"
-                className="border-2 border-black rounded-xl p-1 w-1/4"
-                placeholder="Valor do produto"
-                value={productInput.valor_produto || 0}
-                onChange={(e) =>
-                  setProductInput({
-                    ...productInput,
-                    valor_produto: Number(e.target.value),
-                  })
-                }
-              />
-
-              <label htmlFor="valorProduto">Marca do produto </label>
-              <input
-                type="number"
-                id="marcaProduto"
-                className="border-2 border-black rounded-xl p-1 w-1/4"
-                placeholder="Marca do produto"
-                value={productInput.marca_produto || 0}
-                onChange={(e) =>
-                  setProductInput({
-                    ...productInput,
-                    marca_produto: Number(e.target.value),
-                  })
-                }
-              />
-              <label htmlFor="estoqueProduto">Estoque:</label>
-              <input
-                type="number"
-                id="estoqueProduto"
-                className="border-2 border-black rounded-xl p-1 w-1/4"
-                placeholder="Estoque"
-                value={productInput.estoque || 0}
-                onChange={(e) =>
-                  setProductInput({
-                    ...productInput,
-                    estoque: Number(e.target.value),
-                  })
-                }
-              />
-              <label htmlFor="cidadeProduto">Cidade:</label>
-              <input
-                type="1"
-                id="cidadeProduto"
-                className="border-2 border-black rounded-xl p-1 w-1/4"
-                placeholder="Código da cidade"
-                value={productInput.cidade || 0}
-                onChange={(e) =>
-                  setProductInput({
-                    ...productInput,
-                    cidade: Number(e.target.value),
-                  })
-                }
-              />
-            </div>
-
-            <button className="bg-blue-600 text-white w-40 rounded-xl p-1">
-              Adicionar
-            </button>
-          </form>
+          <>
+            <ProductForm
+              productInput={productInput}
+              setProductInput={setProductInput}
+              handleAddProduct={handleAddProduct}
+              handleCloseModal={() => setModalControl(false)}
+            />
+          </>
         </Modal>
       )}
 
