@@ -80,6 +80,7 @@ export default function ProductForm({
               nome_produto: e.target.value,
             })
           }
+          required
         ></textarea>
         <label htmlFor="valorProduto">Valor do produto:</label>
         <input
@@ -94,6 +95,7 @@ export default function ProductForm({
               valor_produto: Number(e.target.value),
             })
           }
+          required
         />
 
         <label htmlFor="marcaProduto">Marca do produto:</label>
@@ -109,6 +111,7 @@ export default function ProductForm({
               marca_produto: Number(e.target.value),
             })
           }
+          required
         />
         <label htmlFor="estoqueProduto">Estoque:</label>
         <input
@@ -137,6 +140,7 @@ export default function ProductForm({
               cidade: Number(e.target.value),
             })
           }
+          required
         />
       </div>
 
