@@ -4,24 +4,22 @@ import React, { useState, useEffect } from "react";
 type PopupProps = IPopupControl;
 
 export default function Popup({ status, message }: PopupProps) {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true);
+
   useEffect(() => {
+    setVisible(true);
     const timer = setTimeout(() => {
       setVisible(false);
-      console.log(visible);
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [status]);
+  }, [status, message]);
 
   const closePopup = () => {
     setVisible(false);
   };
 
-  if (!visible) {
-    setVisible(true);
-    return null;
-  }
+  if (!visible) return null;
 
   return (
     <div
